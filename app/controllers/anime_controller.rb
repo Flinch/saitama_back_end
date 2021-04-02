@@ -5,7 +5,7 @@ class AnimeController < ApplicationController
 	def get_user
 		user = User.find_by(username: params[:user])
 		if user && user.authenticate(params[:password]) 
-			response = { :isUser => 1, :userID => user.id }
+			response = { :isUser => 1, :userID => user.id, :username => user.username }
 		else
 			response = { :isUser => 0}
 		end	
@@ -24,19 +24,28 @@ class AnimeController < ApplicationController
 			status = { :notice => "Something wrong with API query. We could not get requested resource.", :statusColor => "red" }
       		render json: status
     	else
-    		anime = Anime.find_by(mal_id: mal_id)
-    		if anime === nil
-    			anime = Anime.new(mal_id: response['mal_id'], title: response['title'], image: response['image_url'], description: response['synopsis'], rating: response['score'])
-    			anime.save ? current_user.animes << anime : status = { :notice => "We couldn't save that", :statusColor => "red" }
-	      		render json: status
-	      	else
-	      		current_user.animes.exists?(mal_id: mal_id) ? status = { :notice => "Already added to list", :statusColor => "yellow" } : current_user.animes << anime
-	      		render json: status		
-      		end 
+			anime = Anime.new(mal_id: response['mal_id'], title: response['title'], image: response['image_url'], description: response['synopsis'], rating: response['score'])
+			anime.save ? current_user.animes << anime : status = { :notice => anime.errors.full_messages, :statusColor => "yellow" }
+      		render json: status
     	end
 	end
 
-	def destroy
-		session[:user_id] = nil
+	def getUserAnime
+		current_user = User.find(params[:userID])
+		user_anime = current_user.animes.all
+		render json: user_anime
 	end
+
+	def userSignup
+		user = User.new(username: params[:username], password: params[:password], email: params[:email])
+		if !user.save
+			response = {:status => 0, :message => user.errors.full_messages}
+			render json: response
+		else
+			response = {:status => 1, :message => 'success!', :userID => user.id}
+			render json: response
+		end
+	end
+
+
 end 
