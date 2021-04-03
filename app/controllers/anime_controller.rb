@@ -25,7 +25,17 @@ class AnimeController < ApplicationController
       		render json: status
     	else
 			anime = Anime.new(mal_id: response['mal_id'], title: response['title'], image: response['image_url'], description: response['synopsis'], rating: response['score'])
-			anime.save ? current_user.animes << anime : status = { :notice => anime.errors.full_messages, :statusColor => "yellow" }
+
+			if anime.save
+				current_user.animes << anime
+			else
+				if current_user.animes.find_by(mal_id: anime[:mal_id])
+					status = { :notice => anime.errors.full_messages, :statusColor => "yellow" }
+				else
+					anime = Anime.find_by(mal_id: mal_id)
+					current_user.animes << anime 
+      			end
+      		end
       		render json: status
     	end
 	end
