@@ -57,5 +57,18 @@ class AnimeController < ApplicationController
 		end
 	end
 
+	def removeAnime
+		mal = Mal.find_by(user_id:params[:userID], anime_id:params[:animeID])
+		
+		if mal != nil 
+			mal.delete
+			response = {:status => 1, :notice => "Removed from List"}
+			render json: response
+		else
+			response = {:notice => "We couldn't find that anime. Check the associations table"} 
+			render json: response 
+		end
+	end
+
 
 end 

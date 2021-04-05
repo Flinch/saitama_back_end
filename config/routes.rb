@@ -4,4 +4,5 @@ Rails.application.routes.draw do
   get '/getuser', to: 'anime#get_user'
   get '/getUserAnime', to: 'anime#getUserAnime'
   get '/userSignup', to: 'anime#userSignup'
+  get '/removeAnime', to: 'anime#removeAnime'
 end
